@@ -1,0 +1,32 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<div style="padding: 20px 40px;">
+    <h2 class="mb-4">Добавить фильм</h2>
+    <form method="POST" style="max-width: 500px;">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Название</label>
+            <input type="text" name="title" class="form-control bg-dark text-white border-secondary" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Год (1900-2025)</label>
+            <input type="number" name="year" class="form-control bg-dark text-white border-secondary" min="1900" max="2025" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Режиссёр</label>
+            <input type="text" name="director" class="form-control bg-dark text-white border-secondary" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Жанр</label>
+            <input type="text" name="genre" class="form-control bg-dark text-white border-secondary" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Оценка (1-10, необязательно)</label>
+            <input type="number" name="rating" class="form-control bg-dark text-white border-secondary" min="1" max="10" step="0.1">
+        </div>
+        <button type="submit" class="btn btn-primary">Добавить</button>
+        <a href="/" class="btn btn-outline-secondary ms-2">Отмена</a>
+    </form>
+</div>
+{% endblock %}

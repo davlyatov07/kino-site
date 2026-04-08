@@ -1,0 +1,45 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<div class="tmdb-section">
+    <h2 style="margin-bottom: 24px;">Поиск через TMDB</h2>
+    <form method="GET" class="d-flex gap-2 mb-4" style="max-width: 500px;">
+        <input type="text" name="q" value="{{ query }}" placeholder="Название фильма..."
+               class="tmdb-search-input">
+        <button type="submit" class="tmdb-search-btn">Найти</button>
+    </form>
+
+    {% if results %}
+    <div class="row g-3">
+        {% for movie in results %}
+        <div class="col-md-4 col-lg-3">
+            <div class="tmdb-card">
+                {% if movie.poster_path %}
+                <img src="https://image.tmdb.org/t/p/w300{{ movie.poster_path }}" style="width: 100%;" alt="{{ movie.title }}">
+                {% endif %}
+                <div class="tmdb-card-info">
+                    <div class="tmdb-card-title">{{ movie.title }}</div>
+                    <div class="tmdb-card-meta">
+                        {{ movie.release_date|slice:":4" }} · {{ movie.genre_names }} · {{ movie.vote_average }}/10
+                    </div>
+                    <form method="POST" action="/tmdb/add/">
+                        {% csrf_token %}
+                        <input type="hidden" name="title" value="{{ movie.title }}">
+                        <input type="hidden" name="year" value="{{ movie.release_date|slice:':4' }}">
+                        <input type="hidden" name="rating" value="{{ movie.vote_average }}">
+                        <input type="hidden" name="genre" value="{{ movie.genre_names }}">
+                        <input type="hidden" name="poster" value="{{ movie.poster_path }}">
+                        <input type="hidden" name="description" value="{{ movie.overview }}">
+                        <input type="hidden" name="tmdb_id" value="{{ movie.id }}">
+                        <button type="submit" class="tmdb-add-btn">Добавить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% elif query %}
+    <p style="color: #555;">Ничего не найдено по запросу "{{ query }}"</p>
+    {% endif %}
+</div>
+{% endblock %}

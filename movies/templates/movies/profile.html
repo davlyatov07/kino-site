@@ -1,0 +1,62 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<div class="profile-section">
+    <div class="d-flex align-items-center gap-4 mb-5">
+        <div class="profile-avatar">{{ user.username|first|upper }}</div>
+        <div>
+            <h2 style="margin: 0;">{{ user.username }}</h2>
+            <div class="profile-email">{{ user.email|default:"Email не указан" }}</div>
+        </div>
+    </div>
+
+    <h3 style="margin-bottom: 20px;">Избранное</h3>
+    {% if favorites %}
+    <div class="row g-3 mb-4">
+        {% for fav in favorites %}
+        <div class="col-6 col-md-3 col-lg-2">
+            <div class="profile-fav-card">
+                <a href="/movie/{{ fav.movie.id }}/">
+                    {% if fav.movie.poster %}
+                    <img src="https://image.tmdb.org/t/p/w300{{ fav.movie.poster }}" style="width: 100%;">
+                    {% else %}
+                    <div class="no-poster">Нет постера</div>
+                    {% endif %}
+                </a>
+                <div class="profile-fav-info">
+                    <div class="profile-fav-title">{{ fav.movie.title }}</div>
+                    <a href="/favorite/remove/{{ fav.movie.id }}/" class="profile-fav-remove">Удалить из избранного</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: #555; margin-bottom: 40px;">Избранное пусто — добавьте фильмы!</p>
+    {% endif %}
+
+    <h3 style="margin-bottom: 20px;">Просмотренные фильмы</h3>
+    {% if watched_movies %}
+    <div class="row g-3">
+        {% for movie in watched_movies %}
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="/movie/{{ movie.id }}/" style="text-decoration: none;">
+                <div class="profile-fav-card">
+                    {% if movie.poster %}
+                    <img src="https://image.tmdb.org/t/p/w300{{ movie.poster }}" style="width: 100%;">
+                    {% else %}
+                    <div class="no-poster">Нет постера</div>
+                    {% endif %}
+                    <div class="profile-fav-info">
+                        <div class="profile-fav-title" style="color: #fff;">{{ movie.title }}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: #555;">Нет просмотренных фильмов.</p>
+    {% endif %}
+</div>
+{% endblock %}

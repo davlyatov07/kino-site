@@ -1,0 +1,124 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<div class="detail-section">
+    <a href="/" class="back-link">← Назад</a>
+
+    <div class="row mt-4">
+        <div class="col-md-3">
+            {% if movie.poster %}
+            <img src="https://image.tmdb.org/t/p/w300{{ movie.poster }}" class="detail-poster">
+            {% else %}
+            <div class="detail-no-poster">Нет постера</div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-9">
+            <h1 class="detail-title">{{ movie.title }}</h1>
+            <div class="detail-meta">
+                {{ movie.year }} · {{ movie.genre }} · Режиссёр: {{ movie.director }}
+                {% if movie.rating %} · Оценка: {{ movie.rating }}/10{% endif %}
+            </div>
+
+            {% if movie.description %}
+            <p class="detail-desc">{{ movie.description }}</p>
+            {% endif %}
+
+            {% if movie.video_url %}
+            <iframe class="detail-iframe" src="{{ movie.video_url }}" allowfullscreen></iframe>
+            {% else %}
+            <div class="no-video">Видео не добавлено</div>
+            {% endif %}
+
+            <div class="d-flex gap-3 align-items-center" style="margin-top: 20px;">
+                <a href="/movie/{{ movie.id }}/" class="btn-watch">Смотреть</a>
+
+                {% if user.is_authenticated %}
+                    {% if movie in user_favorites %}
+                    <a href="/favorite/remove/{{ movie.id }}/" class="btn-fav">★ В избранном</a>
+                    {% else %}
+                    <a href="/favorite/add/{{ movie.id }}/" class="btn-fav">☆ В избранное</a>
+                    {% endif %}
+                {% endif %}
+
+                <div style="position: relative;">
+                    <button onclick="toggleDots()" class="btn-dots">⋯</button>
+                    <div id="dotsMenu" class="dots-menu">
+                        {% if not movie.watched %}
+                        <a href="/watched/{{ movie.id }}/" class="dots-menu-item">
+                            <span>✓</span> Отметить просмотренным
+                        </a>
+                        {% else %}
+                        <div class="dots-menu-item disabled">
+                            <span>✓</span> Уже просмотрено
+                        </div>
+                        {% endif %}
+                        <a href="#" class="dots-menu-item"><span>✕</span> Не интересно</a>
+                        {% if user.is_staff %}
+                        <a href="/edit/{{ movie.id }}/" class="dots-menu-item"><span>✎</span> Редактировать</a>
+                        <a href="/delete/{{ movie.id }}/" class="dots-menu-item danger"><span>✕</span> Удалить фильм</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="reviews-section">
+    <h3 style="margin-bottom: 24px;">Отзывы</h3>
+
+    {% if user.is_authenticated and not user_has_review %}
+    <div class="review-form-wrap">
+        <h5 style="margin-bottom: 16px;">Написать отзыв</h5>
+        <form method="POST" action="/review/add/{{ movie.id }}/">
+            {% csrf_token %}
+            <div style="margin-bottom: 16px;">
+                <label class="form-label-dark">Оценка</label>
+                <select name="rating" class="form-select-dark">
+                    {% for i in "12345678910" %}
+                    <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin-bottom: 16px;">
+                <label class="form-label-dark">Отзыв</label>
+                <textarea name="text" rows="4" placeholder="Напишите ваш отзыв..." class="form-textarea-dark"></textarea>
+            </div>
+            <button type="submit" class="btn-submit" style="width: auto; padding: 10px 24px;">Отправить</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if reviews %}
+    {% for review in reviews %}
+    <div class="review-card">
+        <div class="d-flex justify-content-between mb-2">
+            <div class="d-flex align-items-center gap-2">
+                <div class="review-user-avatar">{{ review.user.username|first|upper }}</div>
+                <span style="font-weight: 600;">{{ review.user.username }}</span>
+            </div>
+            <span class="review-rating">{{ review.rating }}/10</span>
+        </div>
+        <p class="review-text">{{ review.text }}</p>
+        <div class="review-date">{{ review.created_at|date:"d.m.Y" }}</div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p style="color: #555;">Отзывов пока нет. Будьте первым!</p>
+    {% endif %}
+</div>
+
+<script>
+function toggleDots() {
+    var menu = document.getElementById('dotsMenu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e) {
+    var menu = document.getElementById('dotsMenu');
+    if (menu && !e.target.closest('[onclick="toggleDots()"]') && !e.target.closest('#dotsMenu')) {
+        menu.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

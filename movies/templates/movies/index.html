@@ -1,0 +1,102 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+{% if movies and not query %}
+<div class="hero-section" id="hero">
+    {% for movie in movies|slice:":5" %}
+    {% if movie.poster %}
+    <div class="hero-slide" style="opacity: {% if forloop.first %}1{% else %}0{% endif %}; z-index: {% if forloop.first %}1{% else %}0{% endif %};">
+        <img class="hero-img" src="https://image.tmdb.org/t/p/original{{ movie.poster }}">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">{{ movie.title }}</h1>
+            <div class="hero-meta">
+                {{ movie.year }} · {{ movie.genre }}
+                {% if movie.rating %} · ⭐ {{ movie.rating }}/10{% endif %}
+            </div>
+            {% if movie.description %}
+            <p class="hero-desc">{{ movie.description|truncatewords:25 }}</p>
+            {% endif %}
+            <a href="/movie/{{ movie.id }}/" class="hero-btn">Смотреть</a>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+    <div class="hero-dots" id="heroDots"></div>
+</div>
+
+<script>
+    var slides = document.querySelectorAll('.hero-slide');
+    var current = 0;
+    var dotsContainer = document.getElementById('heroDots');
+    slides.forEach(function(_, i) {
+        var dot = document.createElement('div');
+        dot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:' + (i === 0 ? '#e50914' : 'rgba(255,255,255,0.4)') + ';cursor:pointer;transition:all 0.3s;';
+        dot.onclick = function() { goTo(i); };
+        dotsContainer.appendChild(dot);
+    });
+    function goTo(n) {
+        slides[current].style.opacity = '0';
+        slides[current].style.zIndex = '0';
+        dotsContainer.children[current].style.background = 'rgba(255,255,255,0.4)';
+        dotsContainer.children[current].style.width = '8px';
+        current = n % slides.length;
+        slides[current].style.opacity = '1';
+        slides[current].style.zIndex = '1';
+        dotsContainer.children[current].style.background = '#e50914';
+        dotsContainer.children[current].style.width = '24px';
+        dotsContainer.children[current].style.borderRadius = '4px';
+    }
+    setInterval(function() { goTo(current + 1); }, 5000);
+</script>
+{% endif %}
+
+{% if all_genres and not query %}
+<div class="genre-filter" id="collection">
+    <a href="/" class="genre-btn {% if not selected_genre %}active{% endif %}">Все</a>
+    {% for genre in all_genres %}
+    <a href="/?genre={{ genre }}#collection" class="genre-btn {% if selected_genre == genre %}active{% endif %}">{{ genre }}</a>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="collection-section" {% if not all_genres or query %}id="collection"{% endif %}>
+    {% if movies %}
+    <div class="section-title">
+        {% if query %}Результаты поиска: "{{ query }}"{% else %}Моя коллекция{% endif %}
+    </div>
+    <div class="row g-3">
+        {% for movie in movies %}
+        <div class="col-6 col-md-3 col-lg-2">
+            <div class="movie-card position-relative">
+                <a href="/movie/{{ movie.id }}/">
+                    {% if movie.poster %}
+                    <img src="https://image.tmdb.org/t/p/w300{{ movie.poster }}" alt="{{ movie.title }}">
+                    {% else %}
+                    <div class="no-poster">Нет постера</div>
+                    {% endif %}
+                </a>
+                {% if movie.rating %}
+                <div class="rating-badge">{{ movie.rating }}</div>
+                {% endif %}
+                {% if movie.watched %}
+                <div class="watched-badge">Просмотрено</div>
+                {% endif %}
+                <div class="card-info">
+                    <div class="card-title-text">{{ movie.title }}</div>
+                    <div class="card-meta">{{ movie.year }} · {{ movie.genre }}</div>
+                    <a href="/movie/{{ movie.id }}/" class="card-btn">Смотреть</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-title">Коллекция пуста</div>
+        <div class="empty-state-sub">Добавьте первый фильм через TMDB или вручную</div>
+        <a href="/tmdb/" class="empty-state-btn">Найти фильм</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
