@@ -211,14 +211,13 @@ def custom_404(request, exception):
     return render(request, 'movies/404.html', status=404)
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-import json
-import asyncio
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler
 
 @csrf_exempt
 def telegram_webhook(request):
     if request.method == 'POST':
+        from telegram import Update
         import bot
+        import asyncio
+        import json
         asyncio.run(bot.process_update(request.body))
     return JsonResponse({'ok': True})
