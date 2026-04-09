@@ -16,5 +16,5 @@ path('favorite/add/<int:movie_id>/', views.add_favorite, name='add_favorite'),
 path('favorite/remove/<int:movie_id>/', views.remove_favorite, name='remove_favorite'),
 path('profile/', views.profile, name='profile'),
 path('review/add/<int:movie_id>/', views.add_review, name='add_review'),
-
+path('telegram-webhook/', views.telegram_webhook, name='telegram_webhook'),
 ]
