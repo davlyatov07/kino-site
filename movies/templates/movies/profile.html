@@ -2,61 +2,130 @@
 
 {% block content %}
 <div class="profile-section">
-    <div class="d-flex align-items-center gap-4 mb-5">
-        <div class="profile-avatar">{{ user.username|first|upper }}</div>
+
+    <!-- PROFILE HEADER -->
+    <div class="profile-header">
+        <div class="profile-avatar-wrap">
+            <div class="profile-avatar" id="profileAvatar">{{ user.username|first|upper }}</div>
+            <button class="avatar-edit-btn" onclick="toggleAvatarPicker()">✏️</button>
+            <!-- COLOR PICKER -->
+            <div class="avatar-picker" id="avatarPicker">
+                <div class="avatar-color" style="background: linear-gradient(135deg, #7c3aed, #a855f7);" onclick="changeAvatar(this, '#7c3aed', '#a855f7')"></div>
+                <div class="avatar-color" style="background: linear-gradient(135deg, #e50914, #ff6b6b);" onclick="changeAvatar(this, '#e50914', '#ff6b6b')"></div>
+                <div class="avatar-color" style="background: linear-gradient(135deg, #1db954, #1ed760);" onclick="changeAvatar(this, '#1db954', '#1ed760')"></div>
+                <div class="avatar-color" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);" onclick="changeAvatar(this, '#f59e0b', '#fbbf24')"></div>
+                <div class="avatar-color" style="background: linear-gradient(135deg, #3b82f6, #60a5fa);" onclick="changeAvatar(this, '#3b82f6', '#60a5fa')"></div>
+                <div class="avatar-color" style="background: linear-gradient(135deg, #ec4899, #f472b6);" onclick="changeAvatar(this, '#ec4899', '#f472b6')"></div>
+            </div>
+        </div>
         <div>
-            <h2 style="margin: 0;">{{ user.username }}</h2>
+            <h2 style="margin: 0; font-size: 28px; font-weight: 800;">{{ user.username }}</h2>
             <div class="profile-email">{{ user.email|default:"Email не указан" }}</div>
+            <!-- STATS -->
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <div class="profile-stat-num">{{ watched_movies|length }}</div>
+                    <div class="profile-stat-label">Просмотрено</div>
+                </div>
+                <div class="profile-stat">
+                    <div class="profile-stat-num">{{ favorites|length }}</div>
+                    <div class="profile-stat-label">Избранное</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <h3 style="margin-bottom: 20px;">Избранное</h3>
+    <!-- FAVORITES -->
+    <h3 id="favorites" class="section-title">⭐ Избранное</h3>
     {% if favorites %}
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-5">
         {% for fav in favorites %}
         <div class="col-6 col-md-3 col-lg-2">
-            <div class="profile-fav-card">
+            <div class="movie-card position-relative">
                 <a href="/movie/{{ fav.movie.id }}/">
                     {% if fav.movie.poster %}
-                    <img src="https://image.tmdb.org/t/p/w300{{ fav.movie.poster }}" style="width: 100%;">
+                    <img src="https://image.tmdb.org/t/p/w300{{ fav.movie.poster }}" alt="{{ fav.movie.title }}">
                     {% else %}
                     <div class="no-poster">Нет постера</div>
                     {% endif %}
                 </a>
-                <div class="profile-fav-info">
-                    <div class="profile-fav-title">{{ fav.movie.title }}</div>
-                    <a href="/favorite/remove/{{ fav.movie.id }}/" class="profile-fav-remove">Удалить из избранного</a>
+                {% if fav.movie.rating %}
+                <div class="rating-badge">{{ fav.movie.rating }}</div>
+                {% endif %}
+                <div class="card-info">
+                    <div class="card-title-text">{{ fav.movie.title }}</div>
+                    <div class="card-meta">{{ fav.movie.year }}</div>
+                    <a href="/favorite/remove/{{ fav.movie.id }}/" class="profile-fav-remove">✕ Удалить</a>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <p style="color: #555; margin-bottom: 40px;">Избранное пусто — добавьте фильмы!</p>
+    <div class="empty-state" style="padding: 40px 0;">
+        <div class="empty-state-title">Избранное пусто</div>
+        <div class="empty-state-sub">Добавляйте фильмы в избранное!</div>
+        <a href="/" class="empty-state-btn">Смотреть фильмы</a>
+    </div>
     {% endif %}
 
-    <h3 style="margin-bottom: 20px;">Просмотренные фильмы</h3>
+    <!-- WATCHED -->
+    <h3 id="watched" class="section-title">🎬 Просмотренные</h3>
     {% if watched_movies %}
     <div class="row g-3">
         {% for movie in watched_movies %}
         <div class="col-6 col-md-3 col-lg-2">
-            <a href="/movie/{{ movie.id }}/" style="text-decoration: none;">
-                <div class="profile-fav-card">
+            <div class="movie-card position-relative">
+                <a href="/movie/{{ movie.id }}/">
                     {% if movie.poster %}
-                    <img src="https://image.tmdb.org/t/p/w300{{ movie.poster }}" style="width: 100%;">
+                    <img src="https://image.tmdb.org/t/p/w300{{ movie.poster }}" alt="{{ movie.title }}">
                     {% else %}
                     <div class="no-poster">Нет постера</div>
                     {% endif %}
-                    <div class="profile-fav-info">
-                        <div class="profile-fav-title" style="color: #fff;">{{ movie.title }}</div>
-                    </div>
+                </a>
+                {% if movie.rating %}
+                <div class="rating-badge">{{ movie.rating }}</div>
+                {% endif %}
+                <div class="card-info">
+                    <div class="card-title-text">{{ movie.title }}</div>
+                    <div class="card-meta">{{ movie.year }}</div>
                 </div>
-            </a>
+            </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <p style="color: #555;">Нет просмотренных фильмов.</p>
+    <div class="empty-state" style="padding: 40px 0;">
+        <div class="empty-state-title">Нет просмотренных</div>
+        <div class="empty-state-sub">Отмечайте фильмы как просмотренные!</div>
+    </div>
     {% endif %}
+
 </div>
+
+<script>
+// Avatar color picker
+const savedColor1 = localStorage.getItem('avatarColor1') || '#7c3aed';
+const savedColor2 = localStorage.getItem('avatarColor2') || '#a855f7';
+document.getElementById('profileAvatar').style.background = `linear-gradient(135deg, ${savedColor1}, ${savedColor2})`;
+
+function toggleAvatarPicker() {
+    const picker = document.getElementById('avatarPicker');
+    picker.style.display = picker.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function changeAvatar(el, color1, color2) {
+    document.getElementById('profileAvatar').style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+    localStorage.setItem('avatarColor1', color1);
+    localStorage.setItem('avatarColor2', color2);
+    document.getElementById('avatarPicker').style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+    const picker = document.getElementById('avatarPicker');
+    if (picker && !e.target.closest('.profile-avatar-wrap')) {
+        picker.style.display = 'none';
+    }
+});
+</script>
 {% endblock %}

@@ -1,10 +1,19 @@
 {% extends 'movies/base.html' %}
 
 {% block content %}
-<div class="detail-section">
+
+<!-- HERO BACKDROP -->
+{% if movie.poster %}
+<div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;">
+    <img src="https://image.tmdb.org/t/p/original{{ movie.poster }}" style="width:100%; height:100%; object-fit:cover; opacity:0.08; filter:blur(20px);">
+</div>
+{% endif %}
+
+<div class="detail-section" style="position: relative; z-index: 1;">
     <a href="/" class="back-link">← Назад</a>
 
-    <div class="row mt-4">
+    <div class="row mt-4 g-4">
+        <!-- POSTER -->
         <div class="col-md-3">
             {% if movie.poster %}
             <img src="https://image.tmdb.org/t/p/w300{{ movie.poster }}" class="detail-poster">
@@ -13,25 +22,43 @@
             {% endif %}
         </div>
 
+        <!-- INFO -->
         <div class="col-md-9">
             <h1 class="detail-title">{{ movie.title }}</h1>
-            <div class="detail-meta">
-                {{ movie.year }} · {{ movie.genre }} · Режиссёр: {{ movie.director }}
-                {% if movie.rating %} · Оценка: {{ movie.rating }}/10{% endif %}
+
+            <!-- META TAGS -->
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+                <span class="detail-tag">📅 {{ movie.year }}</span>
+                {% if movie.rating %}
+                <span class="detail-tag-gold">⭐ {{ movie.rating }}/10</span>
+                {% endif %}
+                <span class="detail-tag">🎬 {{ movie.director }}</span>
+                {% for genre in movie.genre.split %}
+                <span class="detail-tag-accent">{{ genre|cut:"," }}</span>
+                {% endfor %}
             </div>
 
             {% if movie.description %}
             <p class="detail-desc">{{ movie.description }}</p>
             {% endif %}
 
-            {% if movie.video_url %}
-            <iframe class="detail-iframe" src="{{ movie.video_url }}" allowfullscreen></iframe>
-            {% else %}
-            <div class="no-video">Видео не добавлено</div>
-            {% endif %}
+            <!-- VIDEO PLAYER -->
+            <div class="video-wrap" id="videoWrap">
+                {% if movie.video_url %}
+                <iframe id="movieIframe" class="detail-iframe" src="{{ movie.video_url }}" allowfullscreen></iframe>
+                {% else %}
+                <div class="no-video" id="trailerPlaceholder">
+                    <div style="text-align:center;">
+                        <div style="font-size:48px; margin-bottom:12px;">🎬</div>
+                        <div style="color: var(--text2);">Видео не добавлено</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
 
-            <div class="d-flex gap-3 align-items-center" style="margin-top: 20px;">
-                <a href="/movie/{{ movie.id }}/" class="btn-watch">Смотреть</a>
+            <!-- BUTTONS -->
+            <div class="d-flex gap-3 align-items-center flex-wrap" style="margin-top: 20px;">
+                <a href="/movie/{{ movie.id }}/" class="btn-watch">▶ Смотреть</a>
 
                 {% if user.is_authenticated %}
                     {% if movie in user_favorites %}
@@ -65,9 +92,37 @@
     </div>
 </div>
 
-<div class="reviews-section">
-    <h3 style="margin-bottom: 24px;">Отзывы</h3>
+<!-- ПОХОЖИЕ ФИЛЬМЫ -->
+<div class="collection-section" style="position: relative; z-index: 1;">
+    <div class="section-title">Похожие фильмы</div>
+    <div class="row g-3">
+        {% for m in similar_movies %}
+        <div class="col-6 col-md-3 col-lg-2">
+            <div class="movie-card position-relative">
+                <a href="/movie/{{ m.id }}/">
+                    {% if m.poster %}
+                    <img src="https://image.tmdb.org/t/p/w300{{ m.poster }}" alt="{{ m.title }}">
+                    {% else %}
+                    <div class="no-poster">Нет постера</div>
+                    {% endif %}
+                </a>
+                {% if m.rating %}
+                <div class="rating-badge">{{ m.rating }}</div>
+                {% endif %}
+                <div class="card-info">
+                    <div class="card-title-text">{{ m.title }}</div>
+                    <div class="card-meta">{{ m.year }}</div>
+                    <a href="/movie/{{ m.id }}/" class="card-btn">Смотреть</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 
+<!-- ОТЗЫВЫ -->
+<div class="reviews-section" style="position: relative; z-index: 1;">
+    <h3 style="margin-bottom: 24px;">Отзывы</h3>
     {% if user.is_authenticated and not user_has_review %}
     <div class="review-form-wrap">
         <h5 style="margin-bottom: 16px;">Написать отзыв</h5>
@@ -105,7 +160,7 @@
     </div>
     {% endfor %}
     {% else %}
-    <p style="color: #555;">Отзывов пока нет. Будьте первым!</p>
+    <p style="color: var(--text3);">Отзывов пока нет. Будьте первым!</p>
     {% endif %}
 </div>
 

@@ -26,28 +26,28 @@
 </div>
 
 <script>
-    var slides = document.querySelectorAll('.hero-slide');
-    var current = 0;
-    var dotsContainer = document.getElementById('heroDots');
-    slides.forEach(function(_, i) {
-        var dot = document.createElement('div');
-        dot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:' + (i === 0 ? '#e50914' : 'rgba(255,255,255,0.4)') + ';cursor:pointer;transition:all 0.3s;';
-        dot.onclick = function() { goTo(i); };
-        dotsContainer.appendChild(dot);
-    });
-    function goTo(n) {
-        slides[current].style.opacity = '0';
-        slides[current].style.zIndex = '0';
-        dotsContainer.children[current].style.background = 'rgba(255,255,255,0.4)';
-        dotsContainer.children[current].style.width = '8px';
-        current = n % slides.length;
-        slides[current].style.opacity = '1';
-        slides[current].style.zIndex = '1';
-        dotsContainer.children[current].style.background = '#e50914';
-        dotsContainer.children[current].style.width = '24px';
-        dotsContainer.children[current].style.borderRadius = '4px';
-    }
-    setInterval(function() { goTo(current + 1); }, 5000);
+var slides = document.querySelectorAll('.hero-slide');
+var current = 0;
+var dotsContainer = document.getElementById('heroDots');
+
+slides.forEach(function(_, i) {
+    var dot = document.createElement('div');
+    dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = function() { goTo(i); };
+    dotsContainer.appendChild(dot);
+});
+
+function goTo(n) {
+    slides[current].style.opacity = '0';
+    slides[current].style.zIndex = '0';
+    dotsContainer.children[current].classList.remove('active');
+    current = n % slides.length;
+    slides[current].style.opacity = '1';
+    slides[current].style.zIndex = '1';
+    dotsContainer.children[current].classList.add('active');
+}
+
+setInterval(function() { goTo(current + 1); }, 5000);
 </script>
 {% endif %}
 

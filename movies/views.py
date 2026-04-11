@@ -140,6 +140,9 @@ def add_from_tmdb(request):
 def movie_detail(request, movie_id):
     movie = get_object_or_404(Movie, id=movie_id)
     reviews = Review.objects.filter(movie=movie).order_by('-created_at')
+    similar_movies = Movie.objects.filter(
+    genre__icontains=movie.genre.split(',')[0].strip()
+).exclude(id=movie.id)[:6]
     user_favorites = []
     user_has_review = False
     if request.user.is_authenticated:
@@ -149,7 +152,8 @@ def movie_detail(request, movie_id):
         'movie': movie,
         'reviews': reviews,
         'user_favorites': user_favorites,
-        'user_has_review': user_has_review
+        'user_has_review': user_has_review,
+        'similar_movies': similar_movies,
     })
 
 @staff_member_required
