@@ -8,18 +8,51 @@
         {% for field in form %}
         <div style="margin-bottom: 16px;">
             <label class="form-label-dark">{{ field.label }}</label>
+            {% if field.field.widget.input_type == 'password' %}
+            <div style="position: relative;">
+                <input type="password"
+                       name="{{ field.html_name }}"
+                       value="{{ field.value|default:'' }}"
+                       class="form-input-dark"
+                       id="id_{{ field.html_name }}"
+                       style="padding-right: 44px;">
+                <button type="button" onclick="togglePassword('id_{{ field.html_name }}', this)"
+                    style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text2); cursor:pointer; font-size:18px;">
+                    👁️
+                </button>
+            </div>
+            {% else %}
             <input type="{{ field.field.widget.input_type }}"
                    name="{{ field.html_name }}"
+                   value="{{ field.value|default:'' }}"
                    class="form-input-dark">
+            {% endif %}
             {% if field.errors %}
             <div class="form-error">{{ field.errors|join:", " }}</div>
             {% endif %}
         </div>
         {% endfor %}
+        <div style="margin-bottom: 16px;">
+            <label class="form-label-dark">Email</label>
+            <input type="email" name="email" value="{{ request.POST.email }}" class="form-input-dark" placeholder="your@gmail.com" required>
+        </div>
         <button type="submit" class="btn-submit" style="margin-top: 8px;">Зарегистрироваться</button>
     </form>
     <div class="auth-link-wrap">
         Уже есть аккаунт? <a href="/accounts/login/">Войти</a>
     </div>
 </div>
+
+<script>
+function togglePassword(id, btn) {
+    const input = document.getElementById(id);
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+    }
+}
+</script>
 {% endblock %}

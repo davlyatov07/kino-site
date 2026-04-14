@@ -1,6 +1,13 @@
 {% extends 'movies/base.html' %}
 
 {% block content %}
+
+{% if not user.emailverification.is_verified %}
+<div style="background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
+    <span>⚠️ Email не подтверждён — подтвердите чтобы защитить аккаунт</span>
+    <a href="/verify-email/" style="color: var(--accent2); font-weight: 600; text-decoration: none;">Подтвердить →</a>
+</div>
+{% endif %}
 <div class="profile-section">
 
     <!-- PROFILE HEADER -->
@@ -22,16 +29,20 @@
             <h2 style="margin: 0; font-size: 28px; font-weight: 800;">{{ user.username }}</h2>
             <div class="profile-email">{{ user.email|default:"Email не указан" }}</div>
             <!-- STATS -->
-            <div class="profile-stats">
-                <div class="profile-stat">
-                    <div class="profile-stat-num">{{ watched_movies|length }}</div>
-                    <div class="profile-stat-label">Просмотрено</div>
-                </div>
-                <div class="profile-stat">
-                    <div class="profile-stat-num">{{ favorites|length }}</div>
-                    <div class="profile-stat-label">Избранное</div>
-                </div>
-            </div>
+         <div class="profile-stats">
+    <div class="profile-stat">
+        <div class="profile-stat-num">{{ watched_movies|length }}</div>
+        <div class="profile-stat-label">Просмотрено</div>
+    </div>
+    <div class="profile-stat">
+        <div class="profile-stat-num">{{ favorites|length }}</div>
+        <div class="profile-stat-label">Избранное</div>
+    </div>
+    <div class="profile-stat">
+        <div class="profile-stat-num">{{ watchlist|length }}</div>
+        <div class="profile-stat-label">Буду смотреть</div>
+    </div>
+</div>
         </div>
     </div>
 
@@ -69,38 +80,67 @@
     </div>
     {% endif %}
 
-    <!-- WATCHED -->
-    <h3 id="watched" class="section-title">🎬 Просмотренные</h3>
-    {% if watched_movies %}
-    <div class="row g-3">
-        {% for movie in watched_movies %}
-        <div class="col-6 col-md-3 col-lg-2">
-            <div class="movie-card position-relative">
-                <a href="/movie/{{ movie.id }}/">
-                    {% if movie.poster %}
-                    <img src="https://image.tmdb.org/t/p/w300{{ movie.poster }}" alt="{{ movie.title }}">
-                    {% else %}
-                    <div class="no-poster">Нет постера</div>
-                    {% endif %}
-                </a>
-                {% if movie.rating %}
-                <div class="rating-badge">{{ movie.rating }}</div>
+<!-- WATCHED -->
+<h3 id="watched" class="section-title">🎬 Просмотренные</h3>
+{% if watched_movies %}
+<div class="row g-3" style="margin-bottom: 40px;">
+    {% for item in watched_movies %}
+    <div class="col-6 col-md-3 col-lg-2">
+        <div class="movie-card position-relative">
+            <a href="/movie/{{ item.movie.id }}/">
+                {% if item.movie.poster %}
+                <img src="https://image.tmdb.org/t/p/w300{{ item.movie.poster }}" alt="{{ item.movie.title }}">
+                {% else %}
+                <div class="no-poster">Нет постера</div>
                 {% endif %}
-                <div class="card-info">
-                    <div class="card-title-text">{{ movie.title }}</div>
-                    <div class="card-meta">{{ movie.year }}</div>
-                </div>
+            </a>
+            {% if item.movie.rating %}
+            <div class="rating-badge">{{ item.movie.rating }}</div>
+            {% endif %}
+            <div class="card-info">
+    <div class="card-title-text">{{ item.movie.title }}</div>
+    <div class="card-meta">{{ item.movie.year }}</div>
+    <a href="/watched/remove/{{ item.movie.id }}/" class="profile-fav-remove">✕ Удалить</a>
+</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state" style="padding: 40px 0;">
+    <div class="empty-state-title">Нет просмотренных</div>
+    <div class="empty-state-sub">Отмечайте фильмы как просмотренные!</div>
+</div>
+{% endif %}
+<!-- БУДУ СМОТРЕТЬ -->
+<h3 id="watchlist" class="section-title">🕐 Буду смотреть</h3>
+{% if watchlist %}
+<div class="row g-3">
+    {% for item in watchlist %}
+    <div class="col-6 col-md-3 col-lg-2">
+        <div class="movie-card position-relative">
+            <a href="/movie/{{ item.movie.id }}/">
+                {% if item.movie.poster %}
+                <img src="https://image.tmdb.org/t/p/w300{{ item.movie.poster }}" alt="{{ item.movie.title }}">
+                {% else %}
+                <div class="no-poster">Нет постера</div>
+                {% endif %}
+            </a>
+            {% if item.movie.rating %}
+            <div class="rating-badge">{{ item.movie.rating }}</div>
+            {% endif %}
+            <div class="card-info">
+                <div class="card-title-text">{{ item.movie.title }}</div>
+                <div class="card-meta">{{ item.movie.year }}</div>
+                <a href="/watchlist/remove/{{ item.movie.id }}/" class="profile-fav-remove">✕ Удалить</a>
             </div>
         </div>
-        {% endfor %}
     </div>
-    {% else %}
-    <div class="empty-state" style="padding: 40px 0;">
-        <div class="empty-state-title">Нет просмотренных</div>
-        <div class="empty-state-sub">Отмечайте фильмы как просмотренные!</div>
-    </div>
-    {% endif %}
-
+    {% endfor %}
+</div>
+{% else %}
+<p style="color: var(--text2);">Список пуст — добавляй фильмы которые хочешь посмотреть 🕐</p>
+{% endif %}
 </div>
 
 <script>

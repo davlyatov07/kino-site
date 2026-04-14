@@ -9,7 +9,7 @@
 </div>
 {% endif %}
 
-<div class="detail-section" style="position: relative; z-index: 1;">
+<div class="detail-section" style="position: relative; z-index: 99998; overflow: visible;">
     <a href="/" class="back-link">← Назад</a>
 
     <div class="row mt-4 g-4">
@@ -43,51 +43,72 @@
             {% endif %}
 
             <!-- VIDEO PLAYER -->
-            <div class="video-wrap" id="videoWrap">
-                {% if movie.video_url %}
-                <iframe id="movieIframe" class="detail-iframe" src="{{ movie.video_url }}" allowfullscreen></iframe>
-                {% else %}
-                <div class="no-video" id="trailerPlaceholder">
-                    <div style="text-align:center;">
-                        <div style="font-size:48px; margin-bottom:12px;">🎬</div>
-                        <div style="color: var(--text2);">Видео не добавлено</div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
+            <!-- VIDEO PLAYER -->
+<div class="video-wrap" id="videoWrap">
+    {% if movie.trailer_url %}
+    <iframe id="movieIframe" class="detail-iframe" src="{{ movie.trailer_url }}" allowfullscreen></iframe>
+    {% elif movie.video_url %}
+    <iframe id="movieIframe" class="detail-iframe" src="{{ movie.video_url }}" allowfullscreen></iframe>
+    {% else %}
+    <div class="no-video">
+        <div style="text-align:center;">
+            <div style="font-size:48px; margin-bottom:12px;">🎬</div>
+            <div style="color: var(--text2);">Видео не добавлено</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
 
             <!-- BUTTONS -->
-            <div class="d-flex gap-3 align-items-center flex-wrap" style="margin-top: 20px;">
-                <a href="/movie/{{ movie.id }}/" class="btn-watch">▶ Смотреть</a>
+          <!-- BUTTONS -->
+<div class="d-flex gap-3 align-items-center flex-wrap" style="margin-top: 20px;">
+ {% if movie.trailer_url and movie.video_url %}
+<button onclick="toggleVideo()" id="watchBtn" class="btn-watch">▶ Смотреть фильм</button>
+{% else %}
+<a href="/movie/{{ movie.id }}/" class="btn-watch">▶ Смотреть</a>
+{% endif %}
 
-                {% if user.is_authenticated %}
-                    {% if movie in user_favorites %}
-                    <a href="/favorite/remove/{{ movie.id }}/" class="btn-fav">★ В избранном</a>
-                    {% else %}
-                    <a href="/favorite/add/{{ movie.id }}/" class="btn-fav">☆ В избранное</a>
-                    {% endif %}
-                {% endif %}
+    {% if user.is_authenticated %}
+        {% if movie in user_favorites %}
+        <a href="/favorite/remove/{{ movie.id }}/" class="btn-fav">★ В избранном</a>
+        {% else %}
+        <a href="/favorite/add/{{ movie.id }}/" class="btn-fav">☆ В избранное</a>
+        {% endif %}
+    {% endif %}
 
-                <div style="position: relative;">
-                    <button onclick="toggleDots()" class="btn-dots">⋯</button>
-                    <div id="dotsMenu" class="dots-menu">
-                        {% if not movie.watched %}
-                        <a href="/watched/{{ movie.id }}/" class="dots-menu-item">
-                            <span>✓</span> Отметить просмотренным
-                        </a>
-                        {% else %}
-                        <div class="dots-menu-item disabled">
-                            <span>✓</span> Уже просмотрено
-                        </div>
-                        {% endif %}
-                        <a href="#" class="dots-menu-item"><span>✕</span> Не интересно</a>
-                        {% if user.is_staff %}
-                        <a href="/edit/{{ movie.id }}/" class="dots-menu-item"><span>✎</span> Редактировать</a>
-                        <a href="/delete/{{ movie.id }}/" class="dots-menu-item danger"><span>✕</span> Удалить фильм</a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+    <div style="position: relative;">
+        <button onclick="toggleDots()" class="btn-dots">⋯</button>
+        <div id="dotsMenu" class="dots-menu">
+    {% if not is_watched %}
+    <a href="/watched/{{ movie.id }}/" class="dots-menu-item">
+        <span>✓</span> Отметить просмотренным
+    </a>
+    {% else %}
+    <div class="dots-menu-item disabled">
+        <span>✓</span> Уже просмотрено
+    </div>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        {% if not is_in_watchlist %}
+        <a href="/watchlist/add/{{ movie.id }}/" class="dots-menu-item">
+            <span>🕐</span> Буду смотреть
+        </a>
+        {% else %}
+        <a href="/watchlist/remove/{{ movie.id }}/" class="dots-menu-item" style="color: #a855f7;">
+            <span>✓</span> В списке "Буду смотреть"
+        </a>
+        {% endif %}
+    {% endif %}
+
+    <a href="#" class="dots-menu-item"><span>✕</span> Не интересно</a>
+    {% if user.is_staff %}
+    <a href="/edit/{{ movie.id }}/" class="dots-menu-item"><span>✎</span> Редактировать</a>
+    <a href="/delete/{{ movie.id }}/" class="dots-menu-item danger"><span>✕</span> Удалить фильм</a>
+    {% endif %}
+</div>
+    </div>
+</div> 
         </div>
     </div>
 </div>
@@ -175,5 +196,22 @@ document.addEventListener('click', function(e) {
         menu.style.display = 'none';
     }
 });
+var showingTrailer = true;
+
+function toggleVideo() {
+    var iframe = document.getElementById('movieIframe');
+    var btn = document.getElementById('watchBtn');
+    if (!iframe) return;
+    
+    if (showingTrailer) {
+        iframe.src = "{{ movie.video_url }}";
+        btn.textContent = '🎬 Смотреть трейлер';
+        showingTrailer = false;
+    } else {
+        iframe.src = "{{ movie.trailer_url }}";
+        btn.textContent = '▶ Смотреть фильм';
+        showingTrailer = true;
+    }
+}
 </script>
 {% endblock %}

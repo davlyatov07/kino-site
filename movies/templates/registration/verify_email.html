@@ -1,0 +1,36 @@
+{% extends 'movies/base.html' %}
+{% block content %}
+<div class="auth-box">
+    <h2 class="auth-title">Подтверждение email</h2>
+    <p style="color: var(--text2); text-align: center; margin-bottom: 24px;">
+        Мы отправили код на вашу почту
+    </p>
+    {% if error %}
+    <div style="color: #e50914; text-align: center; margin-bottom: 16px;">{{ error }}</div>
+    {% endif %}
+    {% if success %}
+    <div style="color: #1db954; text-align: center; margin-bottom: 16px;">{{ success }}</div>
+    {% endif %}
+    <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 16px;">
+            <label class="form-label-dark">Код подтверждения</label>
+            <input type="text" name="code" class="form-input-dark" placeholder="Введите 6-значный код" maxlength="6">
+        </div>
+        <button type="submit" name="action" value="verify" class="btn-submit">Подтвердить</button>
+    </form>
+    <div style="text-align: center; margin-top: 12px;">
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" name="action" value="resend" style="background: transparent; border: none; color: var(--accent2); cursor: pointer; font-size: 14px;">
+                Не пришёл код? Отправить повторно
+            </button>
+        </form>
+    </div>
+    <div style="text-align: center; margin-top: 12px;">
+        <a href="/" style="color: var(--text3); font-size: 14px; text-decoration: none;">
+            Подтвердить позже →
+        </a>
+    </div>
+</div>
+{% endblock %}

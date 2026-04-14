@@ -49,14 +49,146 @@ function goTo(n) {
 
 setInterval(function() { goTo(current + 1); }, 5000);
 </script>
-{% endif %}
 
-{% if all_genres and not query %}
-<div class="genre-filter" id="collection">
-    <a href="/" class="genre-btn {% if not selected_genre %}active{% endif %}">Все</a>
-    {% for genre in all_genres %}
-    <a href="/?genre={{ genre }}#collection" class="genre-btn {% if selected_genre == genre %}active{% endif %}">{{ genre }}</a>
+{% endif %}
+<!-- ВЕЧЕР ФИЛЬМА -->
+{% if movies and not query %}
+<div style="text-align: center; padding: 32px 0 8px;">
+    <button onclick="openMoodPicker()" style="background: linear-gradient(135deg, #7c3aed, #a855f7); border: none; color: white; padding: 16px 36px; border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer; box-shadow: 0 0 30px rgba(124,58,237,0.4); transition: transform 0.2s;">
+        🎲 Вечер фильма — подобрать за меня
+    </button>
+</div>
+
+<!-- ПОПАП НАСТРОЕНИЯ -->
+<div id="moodOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
+    <div style="background: #0f0f1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; max-width: 500px; width: 90%; text-align: center;">
+        <h2 style="margin-bottom: 8px; font-size: 24px;">Какое настроение? 🎬</h2>
+        <p style="color: #888; margin-bottom: 32px;">Подберём фильм специально для тебя</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+            <button class="mood-btn" onclick="pickMovie('комедия')">😂 Хочу смеяться</button>
+            <button class="mood-btn" onclick="pickMovie('драма')">😢 Хочу поплакать</button>
+            <button class="mood-btn" onclick="pickMovie('ужасы')">😱 Хочу бояться</button>
+            <button class="mood-btn" onclick="pickMovie('боевик')">🔥 Хочу экшн</button>
+            <button class="mood-btn" onclick="pickMovie('фантастика')">🚀 Фантастика</button>
+            <button class="mood-btn" onclick="pickMovie('')">🎲 Случайный</button>
+        </div>
+        <button onclick="closeMood()" style="background:none; border:none; color:#555; cursor:pointer; font-size:14px;">Закрыть</button>
+    </div>
+</div>
+
+<!-- РЕЗУЛЬТАТ -->
+<div id="movieResult" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
+    <div style="background: #0f0f1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; max-width: 400px; width: 90%; text-align: center;">
+        <p style="color: #888; margin-bottom: 16px;">🎬 Твой фильм на сегодня:</p>
+        <img id="resultPoster" src="" style="width: 160px; border-radius: 12px; margin-bottom: 16px; display:none;">
+        <h3 id="resultTitle" style="font-size: 22px; margin-bottom: 8px;"></h3>
+        <p id="resultMeta" style="color: #888; margin-bottom: 24px;"></p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+            <a id="resultLink" href="#" style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: 700;">▶ Смотреть</a>
+            <button onclick="pickMovie(currentMood)" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px 28px; border-radius: 50px; cursor: pointer;">🔄 Другой</button>
+        </div>
+        <button onclick="closeResult()" style="background:none; border:none; color:#555; cursor:pointer; font-size:14px; margin-top: 20px; display:block; margin-left:auto; margin-right:auto;">Закрыть</button>
+    </div>
+</div>
+
+<script>
+var allMovies = [
+    {% for movie in movies %}
+    {
+        id: {{ movie.id }},
+        title: "{{ movie.title|escapejs }}",
+        year: {{ movie.year }},
+        genre: "{{ movie.genre|escapejs }}",
+        rating: "{{ movie.rating|default:'' }}",
+        poster: "{{ movie.poster|default:'' }}"
+    },
     {% endfor %}
+];
+
+var currentMood = '';
+
+function openMoodPicker() {
+    document.getElementById('moodOverlay').style.display = 'flex';
+}
+
+function closeMood() {
+    document.getElementById('moodOverlay').style.display = 'none';
+}
+
+function closeResult() {
+    document.getElementById('movieResult').style.display = 'none';
+}
+
+function pickMovie(mood) {
+    currentMood = mood;
+    closeMood();
+    
+    var filtered = mood 
+        ? allMovies.filter(function(m) { return m.genre.toLowerCase().includes(mood.toLowerCase()); })
+        : allMovies;
+    
+    if (filtered.length === 0) filtered = allMovies;
+    
+    var movie = filtered[Math.floor(Math.random() * filtered.length)];
+    
+    document.getElementById('resultTitle').textContent = movie.title;
+    document.getElementById('resultMeta').textContent = movie.year + (movie.rating ? ' · ⭐ ' + movie.rating + '/10' : '') + ' · ' + movie.genre;
+    document.getElementById('resultLink').href = '/movie/' + movie.id + '/';
+    
+    var poster = document.getElementById('resultPoster');
+    if (movie.poster) {
+        poster.src = 'https://image.tmdb.org/t/p/w300' + movie.poster;
+        poster.style.display = 'block';
+    } else {
+        poster.style.display = 'none';
+    }
+    
+    document.getElementById('movieResult').style.display = 'flex';
+}
+</script>
+{% endif %}
+{% if all_genres and not query %}
+<div id="collection">
+    <!-- ЖАНРЫ -->
+    <div class="genre-filter">
+        <a href="/" class="genre-btn {% if not selected_genre %}active{% endif %}">Все</a>
+        {% for genre in all_genres %}
+        <a href="/?genre={{ genre }}#collection" class="genre-btn {% if selected_genre == genre %}active{% endif %}">{{ genre }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- ФИЛЬТРЫ -->
+    <form method="GET" action="/" style="display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 20px; align-items: center;">
+        {% if selected_genre %}
+        <input type="hidden" name="genre" value="{{ selected_genre }}">
+        {% endif %}
+        <select name="year_from" class="filter-select">
+            <option value="">📅 Год от</option>
+            {% for y in year_range %}
+            <option value="{{ y }}" {% if selected_year_from == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
+        <select name="year_to" class="filter-select">
+            <option value="">📅 Год до</option>
+            {% for y in year_range %}
+            <option value="{{ y }}" {% if selected_year_to == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+        </select>
+        <select name="rating_min" class="filter-select">
+            <option value="">⭐ Рейтинг</option>
+            {% for r in "12345678910" %}
+            <option value="{{ forloop.counter }}" {% if selected_rating_min == forloop.counter|stringformat:"s" %}selected{% endif %}>от {{ forloop.counter }}</option>
+            {% endfor %}
+        </select>
+        <select name="sort" class="filter-select">
+            <option value="">🔀 Сортировка</option>
+            <option value="rating" {% if selected_sort == 'rating' %}selected{% endif %}>⭐ По рейтингу</option>
+            <option value="year" {% if selected_sort == 'year' %}selected{% endif %}>📅 По году</option>
+            <option value="new" {% if selected_sort == 'new' %}selected{% endif %}>🆕 Новые</option>
+        </select>
+        <button type="submit" class="filter-apply-btn">Применить</button>
+        <a href="/" class="filter-reset-btn">✕ Сбросить</a>
+    </form>
 </div>
 {% endif %}
 

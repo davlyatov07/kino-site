@@ -25,10 +25,14 @@
             <label class="form-label">Оценка (1-10)</label>
             <input type="number" name="rating" value="{{ movie.rating|default:'' }}" class="form-control bg-dark text-white border-secondary" min="1" max="10" step="0.1">
         </div>
-        <div class="mb-3">
-            <label class="form-label">Трейлер (YouTube embed ссылка)</label>
-            <input type="text" name="video_url" value="{{ movie.video_url|default:'' }}" class="form-control bg-dark text-white border-secondary" placeholder="https://www.youtube.com/embed/...">
-        </div>
+      <div class="mb-3">
+    <label class="form-label">Трейлер (YouTube embed ссылка)</label>
+    <input type="text" name="trailer_url" value="{{ movie.trailer_url|default:'' }}" class="form-control bg-dark text-white border-secondary" placeholder="https://www.youtube.com/embed/...">
+</div>
+<div class="mb-3">
+    <label class="form-label">Полный фильм (embed ссылка)</label>
+    <input type="text" name="video_url" value="{{ movie.video_url|default:'' }}" class="form-control bg-dark text-white border-secondary" placeholder="https://www.youtube.com/embed/...">
+</div>
         <button type="submit" class="btn btn-primary">Сохранить</button>
         <a href="/" class="btn btn-outline-secondary ms-2">Отмена</a>
     </form>
