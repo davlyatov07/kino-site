@@ -44,7 +44,12 @@
                     {% if user.is_staff %}
                     <a href="/dashboard/" class="dropdown-item-custom">⚙️ Панель админа</a>
                     {% endif %}
-                    <a href="/accounts/logout/" class="dropdown-item-custom" style="color: #a855f7; border-top: 1px solid #333;">🚪 Выйти</a>
+                  <form action="{% url 'logout' %}" method="post" style="display: inline; width: 100%;">
+    {% csrf_token %}
+    <button type="submit" class="dropdown-item-custom" style="color: #a855f7; border-top: 1px solid #333; background: none; width: 100%; text-align: left; cursor: pointer;">
+        🚪 Выйти
+    </button>
+</form>
                 </div>
             </div>
         {% else %}
