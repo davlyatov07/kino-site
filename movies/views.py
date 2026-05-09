@@ -425,7 +425,7 @@ def telegram_webhook(request):
                 if text == '/start':
                     reply = '🎬 Привет! Я бот DYNЁ TV\n\n/movies — список фильмов'
                 elif text == '/movies':
-                    films = Movie.objects.all()[:10]
+                    films = Movie.objects.all()[:20]
                     reply = '🎬 Фильмы:\n\n' + ''.join([f'• {m.title} ({m.year})\n' for m in films])
                 else:
                     reply = 'Используй /movies или /start'
