@@ -228,12 +228,51 @@ def movie_detail(request, movie_id):
         'is_in_watchlist': is_in_watchlist,
     })
 
-
+def search_suggestions(request):
+    q = request.GET.get('q', '')
+    if q:
+        movies = Movie.objects.filter(title__icontains=q)[:5]
+        results = [{'id': m.id, 'title': m.title} for m in movies]
+    else:
+        results = []
+    return JsonResponse({'results': results})
 # === ПАНЕЛЬ АДМИНИСТРАТОРА — только для staff ===
 @staff_member_required
 def dashboard(request):
+    
     movies = Movie.objects.all().order_by('-created_at')
-    return render(request, 'movies/dashboard.html', {'movies': movies})
+
+    # Данные для графика жанров
+    from collections import Counter
+    genre_counter = Counter()
+    for m in Movie.objects.all():
+        if m.genre:
+            for g in m.genre.split(','):
+                genre_counter[g.strip()] += 1
+    top_genres = genre_counter.most_common(6)
+    genre_labels = [g[0] for g in top_genres]
+    genre_counts = [g[1] for g in top_genres]
+
+    # Данные для графика по годам
+    from django.db.models import Count
+    years_data = Movie.objects.values('year').annotate(count=Count('id')).order_by('year')
+    year_labels = [str(y['year']) for y in years_data]
+    year_counts = [y['count'] for y in years_data]
+
+    # Общая статистика
+    total_movies = Movie.objects.count()
+    avg_rating = Movie.objects.filter(rating__isnull=False).values_list('rating', flat=True)
+    avg = round(sum(avg_rating) / len(avg_rating), 1) if avg_rating else 0
+
+    return render(request, 'movies/dashboard.html', {
+        'movies': movies,
+        'genre_labels': genre_labels,
+        'genre_counts': genre_counts,
+        'year_labels': year_labels,
+        'year_counts': year_counts,
+        'total_movies': total_movies,
+        'avg_rating': avg,
+    })
 
 
 # === РЕГИСТРАЦИЯ С ПОДТВЕРЖДЕНИЕМ EMAIL ===
@@ -417,7 +456,7 @@ def telegram_webhook(request):
                 return JsonResponse({'ok': True})
 
             def send_reply():
-                import requests as req
+                
                 token = '8550706241:AAHFkE5voCV3aUbjGXZouSOkYw3OgHU3HIw'
                 chat_id = message['chat']['id']
                 text = message.get('text', '')

@@ -21,4 +21,5 @@ path('verify-email/', views.verify_email, name='verify_email'),
 path('watchlist/add/<int:movie_id>/', views.add_watchlist, name='add_watchlist'),
 path('watchlist/remove/<int:movie_id>/', views.remove_watchlist, name='remove_watchlist'),
 path('watched/remove/<int:movie_id>/', views.remove_watched, name='remove_watched'),
+path('search-suggestions/', views.search_suggestions, name='search_suggestions'),
 ]

@@ -8,6 +8,28 @@
         <a href="/add/" class="btn-edit" style="padding: 10px 20px;">Добавить вручную</a>
     </div>
 
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
+        <div style="background: #1a1a2e; border: 1px solid #7C3AED; border-radius: 12px; padding: 20px 30px; text-align: center; min-width: 150px;">
+            <div style="font-size: 2rem; font-weight: bold; color: #A78BFA;">{{ total_movies }}</div>
+            <div style="color: #aaa; font-size: 0.9rem;">Всего фильмов</div>
+        </div>
+        <div style="background: #1a1a2e; border: 1px solid #7C3AED; border-radius: 12px; padding: 20px 30px; text-align: center; min-width: 150px;">
+            <div style="font-size: 2rem; font-weight: bold; color: #A78BFA;">{{ avg_rating }}</div>
+            <div style="color: #aaa; font-size: 0.9rem;">Средний рейтинг</div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 40px;">
+        <div style="background: #1a1a2e; border: 1px solid #7C3AED; border-radius: 12px; padding: 20px; flex: 1; min-width: 280px;">
+            <h5 style="color: white; margin-bottom: 16px;">🎭 Фильмы по жанрам</h5>
+            <canvas id="genreChart" height="220"></canvas>
+        </div>
+        <div style="background: #1a1a2e; border: 1px solid #7C3AED; border-radius: 12px; padding: 20px; flex: 1; min-width: 280px;">
+            <h5 style="color: white; margin-bottom: 16px;">📅 Фильмы по годам</h5>
+            <canvas id="yearChart" height="220"></canvas>
+        </div>
+    </div>
+
     <table class="admin-table">
         <thead>
             <tr>
@@ -52,4 +74,57 @@
         </tbody>
     </table>
 </div>
+
+{{ genre_labels|json_script:"genre-labels" }}
+{{ genre_counts|json_script:"genre-counts" }}
+{{ year_labels|json_script:"year-labels" }}
+{{ year_counts|json_script:"year-counts" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const genreLabels = JSON.parse(document.getElementById('genre-labels').textContent);
+  const genreCounts = JSON.parse(document.getElementById('genre-counts').textContent);
+  const yearLabels  = JSON.parse(document.getElementById('year-labels').textContent);
+  const yearCounts  = JSON.parse(document.getElementById('year-counts').textContent);
+
+  new Chart(document.getElementById('genreChart'), {
+    type: 'doughnut',
+    data: {
+      labels: genreLabels,
+      datasets: [{
+        data: genreCounts,
+        backgroundColor: ['#7C3AED','#A78BFA','#EC4899','#06B6D4','#10B981','#F59E0B'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: 'white', font: { size: 12 } } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('yearChart'), {
+    type: 'bar',
+    data: {
+      labels: yearLabels,
+      datasets: [{
+        label: 'Количество фильмов',
+        data: yearCounts,
+        backgroundColor: '#7C3AED',
+        borderRadius: 6
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: 'white' } }
+      },
+      scales: {
+        x: { ticks: { color: '#aaa' }, grid: { color: '#333' } },
+        y: { ticks: { color: '#aaa', stepSize: 1 }, grid: { color: '#333' } }
+      }
+    }
+  });
+</script>
+
 {% endblock %}

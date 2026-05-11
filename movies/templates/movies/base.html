@@ -22,7 +22,7 @@
                 <div class="search-input-box" id="searchWrap">
                     <input type="text" name="q" class="search-input" placeholder="Поиск..." id="searchInput">
                 </div>
-                <button type="button" class="search-icon-btn" onclick="toggleSearch()">
+            <button type="button" class="search-icon-btn" onclick="toggleSearch()">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                     </svg>
@@ -97,7 +97,41 @@ function toggleSearch() {
             if (e.key === 'Enter') document.getElementById('searchForm').submit();
         };
     }
+    
 }
+document.getElementById('searchInput').addEventListener('input', function() {
+    var q = this.value.trim();
+    var existing = document.getElementById('suggestions');
+    if (existing) existing.remove();
+    if (q.length < 2) return;
+    fetch('/search-suggestions/?q=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(data => {
+            if (!data.results.length) return;
+            var box = document.createElement('div');
+            box.id = 'suggestions';
+            box.style.cssText = 'position:absolute; background:#1a1a2e; border:1px solid #7C3AED; border-radius:10px; top:100%; left:0; right:0; z-index:9999;';
+            data.results.forEach(function(m) {
+                var item = document.createElement('div');
+                item.textContent = m.title;
+                item.style.cssText = 'padding:10px 16px; cursor:pointer; color:white; font-size:14px;';
+                item.onmouseover = function() { this.style.background='#7C3AED'; };
+                item.onmouseout = function() { this.style.background='transparent'; };
+                item.onclick = function() { window.location.href='/?q='+encodeURIComponent(m.title); };
+                box.appendChild(item);
+            });
+            var wrap = document.getElementById('searchWrap');
+            wrap.style.position = 'relative';
+            wrap.appendChild(box);
+        });
+});
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#searchWrap')) {
+        var s = document.getElementById('suggestions');
+        if (s) s.remove();
+    }
+});
+
 
 function toggleMenu() {
     var menu = document.getElementById('profileMenu');
