@@ -147,7 +147,7 @@ body::before {
 .dropdown-item-custom:hover { background: var(--card-hover); color: var(--text); }
 
 /* === MAIN CONTENT === */
-.main-content { padding-top: 70px; position: relative; z-index: 1; }
+.main-content { padding-top: 100px; position: relative; z-index: 1; }
 
 /* === MOVIE CARDS — GLASSMORPHISM + 3D === */
 .movie-card {
