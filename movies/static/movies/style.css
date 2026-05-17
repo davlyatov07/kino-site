@@ -61,9 +61,11 @@ body::before {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     position: fixed; top: 0; left: 0; width: 100%;
-    z-index: 1000; padding: 14px 40px;
+    z-index: 1000; padding: 10px 40px;
     border-bottom: 1px solid var(--border);
-    display: flex; justify-content: space-between; align-items: center;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
     transition: all 0.3s;
 }
 
@@ -72,9 +74,11 @@ body::before {
     letter-spacing: 3px; text-decoration: none;
     text-shadow: 0 0 20px var(--accent-glow);
     transition: text-shadow 0.3s;
+    display: flex;
+    align-items: center;
+    padding: 0;
 }
 .navbar-brand:hover { text-shadow: 0 0 40px var(--accent-glow), 0 0 80px var(--accent-glow); }
-
 .nav-right { display: flex; align-items: center; gap: 16px; }
 
 .nav-btn {
